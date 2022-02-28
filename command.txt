@@ -1,0 +1,52 @@
+nsml run -d ffhq_lmdb_256 -g 8 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--n_sample=8 --save_checkpoint_frequency=100 \
+--batch=4 --num_workers=16 \
+--Generator=CIPSskip \
+--img2dis" \
+-m "cips_reproduce" --gpu-driver-version "440"
+KR99591/ffhq_lmdb_256/
+
+
+
+
+
+
+nsml run -d ffhq_lmdb_256 -g 8 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--n_sample=8 \
+--batch=4 --num_workers=16 \
+--Generator=CIPSskip \
+--img2dis" \
+-m "cips_reproduce_8gpu" --gpu-driver-version "440"
+KR99591/ffhq_lmdb_256/
+
+
+
+
+
+
+
+
+
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=16 \
+--n_sample=8 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskip \
+--img2dis" \
+-m "cips_reproduce_4gpu_fb16" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/
+
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--n_sample=8 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskip \
+--img2dis" \
+-m "cips_reproduce_4gpu_fb8" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/

@@ -1,3 +1,5 @@
+#nsml: nvcr.io/nvidia/pytorch:20.12-py3
+
 lmdb
 numpy
 torch
@@ -6,3 +8,4 @@ tqdm
 pillow
 opencv-python
 torch-fidelity
+tensorboard==1.15

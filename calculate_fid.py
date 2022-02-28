@@ -22,7 +22,7 @@ def calculate_fid(model, fid_dataset, bs, size, num_batches, latent_size, intege
             torchvision.utils.save_image(fake_img[j, :, :, :],
                                          os.path.join(save_dir, '%s.png' % str(i * bs + j).zfill(5)), range=(-1, 1),
                                          normalize=True)
-    metrics_dict = calculate_metrics(save_dir, fid_dataset, cuda=True, isc=False, fid=True, kid=False, verbose=False)
+    metrics_dict = calculate_metrics(input1=save_dir, input2=fid_dataset, cuda=True, isc=False, fid=True, kid=False, verbose=False, save_cpu_ram=True)
     return metrics_dict
 
 
