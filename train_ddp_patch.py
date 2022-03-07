@@ -14,7 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 import model
-from dataset import MultiScaleDataset, ImageDataset
+from dataset import MultiScaleDataset, ImageDataset, MultiScalePatchDataset
 from calculate_fid import calculate_fid
 from distributed import get_rank, synchronize, reduce_loss_dict
 from tensor_transforms import convert_to_coord_format
@@ -128,6 +128,10 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
     # pure training time
     pure_training_iteration_time = 0
 
+    # initialize coordinate embeddings
+    g_module.re_init_phase(3)
+    g_ema.re_init_phase(3)
+
     for idx in pbar:
         i = idx + args.start_iter
 
@@ -139,9 +143,11 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
         # start time
         start = time.time()
 
-        data = next(loader)
+        data, grid_h, grid_w = next(loader)
         key = np.random.randint(n_scales)
         real_stack = data[key].to(device)
+        grid_h = grid_h.to(device)
+        grid_w = grid_w.to(device)
 
         real_img, converted = real_stack[:, :3], real_stack[:, 3:]
 
@@ -150,7 +156,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
 
         noise = mixing_noise(args.batch, args.latent, args.mixing, device)
 
-        fake_img, _ = generator(converted, noise)
+        fake_img, _ = generator(converted, noise, grid_h, grid_w)
         fake = fake_img if args.img2dis else torch.cat([fake_img, converted], 1)
         fake_pred = discriminator(fake, key)
 
@@ -185,7 +191,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
 
         noise = mixing_noise(args.batch, args.latent, args.mixing, device)
 
-        fake_img, _ = generator(converted, noise)
+        fake_img, _ = generator(converted, noise, grid_h, grid_w)
         fake = fake_img if args.img2dis else torch.cat([fake_img, converted], 1)
         fake_pred = discriminator(fake, key)
         g_loss = g_nonsaturating_loss(fake_pred)
@@ -396,6 +402,7 @@ def ddp_worker(device, args):
             device_ids=[device],
             output_device=device,
             broadcast_buffers=False,
+            find_unused_parameters=True,
         )
 
         discriminator = nn.parallel.DistributedDataParallel(
@@ -403,6 +410,7 @@ def ddp_worker(device, args):
             device_ids=[device],
             output_device=device,
             broadcast_buffers=False,
+            find_unused_parameters=True,
         )
 
     transform = transforms.Compose(
@@ -416,9 +424,9 @@ def ddp_worker(device, args):
                                     transforms.ToTensor(),
                                     transforms.Lambda(lambda x: x.mul_(255.).byte())])
 
-    dataset = MultiScaleDataset(args.path, transform=transform, resolution=args.coords_size, crop_size=args.crop,
-                                integer_values=args.coords_integer_values, to_crop=args.to_crop)
-    fid_dataset = ImageDataset(args.path, transform=transform_fid, resolution=args.coords_size, to_crop=args.to_crop)
+    dataset = MultiScalePatchDataset(args.path, transform=transform, resolution=args.coords_size, crop_size=int(args.coords_size/4),
+                                integer_values=args.coords_integer_values, to_crop=True)
+    fid_dataset = ImageDataset(args.path, transform=transform_fid, resolution=args.coords_size, to_crop=False)
     fid_dataset.length = args.fid_samples
     loader = data.DataLoader(
         dataset,

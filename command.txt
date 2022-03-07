@@ -50,3 +50,218 @@ nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "t
 --img2dis" \
 -m "cips_reproduce_4gpu_fb8" --gpu-driver-version "440"
 ailab002/ffhq_lmdb_256/
+
+
+
+CUDA_VISIBLE_DEVICES=0 python prepare_data.py images /SSD/stargan-v2/data/afhq --out /SSD/stargan-v2/data/afhq/afhq_lmdb_256 --n_worker 8 --size 64
+CUDA_VISIBLE_DEVICES=0 python prepare_data.py images /SSD/stargan-v2/data/afhq --out /SSD/stargan-v2/data/afhq/afhq_lmdb_256 --n_worker 8 --size 128
+CUDA_VISIBLE_DEVICES=0 python prepare_data.py images /SSD/stargan-v2/data/afhq --out /SSD/stargan-v2/data/afhq/afhq_lmdb_256 --n_worker 8 --size 256
+nsml dataset push new_afhq_lmdb_256 /SSD/stargan-v2/data/afhq/afhq_lmdb_256 --private
+
+
+
+
+
+
+
+
+
+########## image training ##########
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--n_sample=8 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskip \
+--img2dis" \
+-m "cips_reproduce_4gpu" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/133
+
+nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
+--fid_samples=16130 --fid_batch=8 \
+--n_sample=8 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskip \
+--img2dis" \
+-m "cips_reproduce_4gpu" --gpu-driver-version "440"
+ailab002/new_afhq_lmdb_256/5
+
+nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--n_sample=8 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskip \
+--img2dis" \
+-m "cips_reproduce_4gpu" --gpu-driver-version "440"
+ailab002/lsun_church_lmdb_256/60
+
+
+
+########## patch training ##########
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_patch.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--n_sample=8 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_patch" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/137
+
+nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_patch.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
+--fid_samples=16130 --fid_batch=8 \
+--n_sample=8 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_patch" --gpu-driver-version "440"
+ailab002/new_afhq_lmdb_256/6
+
+nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_patch.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--n_sample=8 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_patch" --gpu-driver-version "440"
+ailab002/lsun_church_lmdb_256/62
+
+
+
+########## multi-stage training + random init ##########
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_random.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.1 --structure_loss2=0.1 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_random" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/142
+
+nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_random.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--fid_samples=16130 --p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.01 --structure_loss2=0.1 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_random" --gpu-driver-version "440"
+ailab002/new_afhq_lmdb_256/7
+
+nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_random.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.01 --structure_loss2=0.01 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_random" --gpu-driver-version "440"
+ailab002/lsun_church_lmdb_256/64
+
+
+
+########## nearest neighbor ##########
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_nearest.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.1 --structure_loss2=0.1 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_nearest" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/145
+
+nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_nearest.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
+--fid_samples=16130 --fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.01 --structure_loss2=0.1 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_nearest" --gpu-driver-version "440"
+ailab002/new_afhq_lmdb_256/8
+
+nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_nearest.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.01 --structure_loss2=0.01 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_nearest" --gpu-driver-version "440"
+ailab002/lsun_church_lmdb_256/65
+
+
+
+########## bilinear ##########
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_bilinear.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.1 --structure_loss2=0.1 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_bilinear" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/154
+
+nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_bilinear.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
+--fid_samples=16130 --fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.01 --structure_loss2=0.1 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_bilinear" --gpu-driver-version "440"
+ailab002/new_afhq_lmdb_256/9
+
+nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_bilinear.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.01 --structure_loss2=0.01 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_bilinear" --gpu-driver-version "440"
+ailab002/lsun_church_lmdb_256/70
+
+
+
+########## remove ##########
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_remove.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.1 --structure_loss2=0.1 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskippatch \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_remove" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/153
+
+nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_remove.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
+--fid_samples=16130 --fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.01 --structure_loss2=0.1 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskippatch \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_remove" --gpu-driver-version "440"
+ailab002/new_afhq_lmdb_256/76
+
+nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_remove.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0.01 --structure_loss2=0.01 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskippatch \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_remove" --gpu-driver-version "440"
+ailab002/lsun_church_lmdb_256/69
+
+
+
+########## dual discriminator ##########
