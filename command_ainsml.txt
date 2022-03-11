@@ -141,7 +141,7 @@ nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "t
 --Generator=CIPSskipemb \
 --Discriminator=DiscriminatorPatch --img2dis" \
 -m "cips_reproduce_4gpu_multi_stage_random" --gpu-driver-version "440"
-ailab002/ffhq_lmdb_256/142
+ailab002/ffhq_lmdb_256/184
 
 nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_random.py" \
 -a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
@@ -161,7 +161,7 @@ nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 1
 --Generator=CIPSskipemb \
 --Discriminator=DiscriminatorPatch --img2dis" \
 -m "cips_reproduce_4gpu_multi_stage_random" --gpu-driver-version "440"
-ailab002/lsun_church_lmdb_256/64
+ailab002/lsun_church_lmdb_256/
 
 
 
@@ -174,7 +174,7 @@ nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "t
 --Generator=CIPSskipemb \
 --Discriminator=DiscriminatorPatch --img2dis" \
 -m "cips_reproduce_4gpu_multi_stage_nearest" --gpu-driver-version "440"
-ailab002/ffhq_lmdb_256/145
+ailab002/ffhq_lmdb_256/
 
 nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_nearest.py" \
 -a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
@@ -194,7 +194,7 @@ nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 1
 --Generator=CIPSskipemb \
 --Discriminator=DiscriminatorPatch --img2dis" \
 -m "cips_reproduce_4gpu_multi_stage_nearest" --gpu-driver-version "440"
-ailab002/lsun_church_lmdb_256/65
+ailab002/lsun_church_lmdb_256/
 
 
 
@@ -264,4 +264,66 @@ ailab002/lsun_church_lmdb_256/69
 
 
 
-########## dual discriminator ##########
+########## dual discriminator + remove ##########
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_remove_duald.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0 --structure_loss2=0 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskippatch \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_remove_duald" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/181
+
+nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_remove_duald.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
+--fid_samples=16130 --fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0 --structure_loss2=0 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskippatch \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_remove_duald" --gpu-driver-version "440"
+ailab002/new_afhq_lmdb_256/77
+
+nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_remove_duald.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0 --structure_loss2=0 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskippatch \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_remove_duald" --gpu-driver-version "440"
+ailab002/lsun_church_lmdb_256/86
+
+
+
+########## dual discriminator + random init ##########
+nsml run -d ffhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_random_duald.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/ffhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0 --structure_loss2=0 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_random_duald" --gpu-driver-version "440"
+ailab002/ffhq_lmdb_256/182
+
+nsml run -d new_afhq_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_random_duald.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/new_afhq_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--fid_samples=16130 --p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0 --structure_loss2=0 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_random_duald" --gpu-driver-version "440"
+ailab002/new_afhq_lmdb_256/
+
+nsml run -d lsun_church_lmdb_256 -g 4 --memory "128G" --shm-size "64GB" --cpus 16 -e "train_ddp_multi_stage_random_duald.py" \
+-a "/data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/64 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/128 /data_nfs/generation-nfs/namwoo/cips/lsun_church_lmdb_256/256 --output_dir=experiment \
+--fid_batch=8 \
+--p1iter=120000 --p2iter=120000 --iter=1200000 --n_sample=8 --structure_loss=0 --structure_loss2=0 \
+--batch=8 --num_workers=16 \
+--Generator=CIPSskipemb \
+--Discriminator=DiscriminatorPatch --img2dis" \
+-m "cips_reproduce_4gpu_multi_stage_random_duald" --gpu-driver-version "440"
+ailab002/lsun_church_lmdb_256/80
